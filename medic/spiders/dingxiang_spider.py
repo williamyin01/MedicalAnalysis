@@ -16,37 +16,34 @@ class dxSpider(scrapy.Spider):
     }
 
     q_id = 10000
-    END_ID = 100000
     def start_requests(self):
+        START_ID = 10000
+        END_ID = 20000
         base_url = 'https://m.dxy.com/q'
-        while self.q_id < self.END_ID:
-            self.q_id += 1
-            next_href = base_url + '/' + str(self.q_id)
+        for id in range(START_ID, END_ID):
+            self.q_id = id
+            next_href = base_url + '/' + str(id)
             yield scrapy.Request(next_href, self.parse)
         
     def parse(self, response):
         n_q_a = 3
         if response.status == 200:
             # it = ItemLoader(item=MedicItem())
-            self.count += 1
+            # self.count += 1
             it = MedicItem()
             date = response.xpath('//p[@class="dialog-child-person-right-date"]/text()').get()
             doctor_id = response.xpath('//a[@class="question-detail-doctor"]/@href').get()
             doctor_id = int(re.search(r'/user/(\d+)', doctor_id).group(1))
-            # q_a = response.xpath('//p[@class="dialog-child-content-text patient-color"]')
             questions = response.xpath('//article[@class="dialog-content divide"]/div//p[@class="dialog-child-content-text patient-color"]')
             questions = [q.xpath('string(.)').get() for q in questions]
+
             answers = []
             for i in range(len(questions)):
                 i+=1
                 curr_answers = response.xpath('//article[@class="dialog-content divide"]/*/following-sibling::section[count(preceding-sibling::div)={0}]//p[@class="dialog-child-content-text patient-color"]'.format(i))
                 answers.append([a.xpath('string(.)').get() for a in curr_answers])
-            # answers = response.xpath('//div[@class="question-detail"]/article/section//p[@class="dialog-child-content-text patient-color"]')
-            # answers = [a.xpath('string(.)').get() for a in answers]
             answers = [''.join(a_list) for a_list in answers]
 
-            # q_a = [t.xpath('string(.)').extract() for t in q_a]
-            # q_a = self.keep_list_length(q_a, n_q_a)
             questions = self.keep_list_length(questions, n_q_a)
             answers = self.keep_list_length(answers, n_q_a)
             it['date'] = date

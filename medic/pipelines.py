@@ -29,7 +29,7 @@ class DxAdvPipeline(object):
         self.conn = sqlite3.connect(self.sqlite_file)
         self.cur = self.conn.cursor()
         create_table = '''create table if not exists dialogs (
-                id int,
+                id int not null,
                 date varchar,
                 doctor_id int,
                 question text,

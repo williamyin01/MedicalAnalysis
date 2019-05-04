@@ -5,7 +5,7 @@ try:
         [
             'scrapy',
             'crawl',
-            'dxadv',
+            'q_id_spider',
             # '-o',
             # 'out.json',
         ]

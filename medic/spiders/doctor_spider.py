@@ -12,7 +12,6 @@ class DoctorSpider(scrapy.Spider):
     name = 'doctorSpider'
     allow_domains = ['dxy.com']
     custom_settings = {
-        'USER_AGENT': 'Mozilla/5.num (Windows NT 10.num; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.num.3729.108 Safari/537.36',
         # 'FEED_URI': 'dxadv-doctor.csv',
         # 'FEED_IMPORT': 'CSV',
         'SQLITE_FILE': 'dxadv.db',

@@ -6,7 +6,7 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+from scrapy.exceptions import IgnoreRequest
 
 class MedicSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -27,13 +27,13 @@ class MedicSpiderMiddleware(object):
         # Should return None or raise an exception.
         return None
 
-    def process_spider_output(self, response, result, spider):
+    # def process_spider_output(self, response, result, spider):
         # Called with the results returned from the Spider, after
         # it has processed the response.
 
         # Must return an iterable of Request, dict or Item objects.
-        for i in result:
-            yield i
+        # for i in result:
+            # yield i
 
     def process_spider_exception(self, response, exception, spider):
         # Called when a spider or process_spider_input() method
@@ -51,10 +51,6 @@ class MedicSpiderMiddleware(object):
         # Must return only requests (not items).
         for r in start_requests:
             yield r
-
-    def spider_opened(self, spider):
-        spider.logger.info('Spider opened: %s' % spider.name)
-
 
 class MedicDownloaderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -101,3 +97,35 @@ class MedicDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+class CheckURLMiddleware(object):
+    def __init__(self):
+        self.usedurlsA = None
+        self.logger = logging.getLogger('CheckURLMiddleware')
+    def process_request(self, request, spider):
+        self.logger.debug(len(self.usedurlsR.readlines()))
+        if request.url in self.usedurlsR.readlines():
+            self.logger.debug('Ignore url in process_request: {}'.format(request.url))
+            raise IgnoreRequest
+        else:
+            return None
+    def process_response(self, request, response, spider):
+        self.usedurlsA.write(request.url + '\n')
+        self.usedurlsA.flush()
+        return response
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # This method is used by Scrapy to create your spiders.
+        s = cls()
+        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
+        return s
+    def spider_opened(self, spider):
+        spider.logger.info('Spider opened: %s' % spider.name)
+        self.usedurlsA = open('usedURL.log', 'a+')
+        self.usedurlsR = open('usedURL.log', 'r+')
+    def spider_closed(self, spider):
+        spider.logger.info('Spider closed: %s' % spider.name)
+        self.usedurlsA.close()
+        self.usedurlsR.close()

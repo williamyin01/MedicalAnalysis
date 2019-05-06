@@ -19,27 +19,47 @@ class DoctorSpider(scrapy.Spider):
         'ITEM_PIPELINES': {
             'medic.pipelines.DxAdvPipeline': 300,
         },
+        'DOWNLOADER_MIDDLEWARES': {
+            # 'medic.middlewares.CheckURLMiddleware': 100,
+            'scrapy.downloadermiddlewares.retry.RetryMiddleware': 190,
+            'medic.scrapy_proxies.ProxyMiddleware': 200,
+            'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 210,
+            'random_useragent.RandomUserAgentMiddleware': 150,
+            'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
+        },
+        # user agents list
+        'USER_AGENT_LIST': "medic/useragents.txt",
+        'RETRY_TIMES': 3,
+        # 'PROXY_API': 'http://127.0.0.1:5010',
+        'PROXY_API': 'http://api.ip.data5u.com/dynamic/get.html?order=bba7c6b714bf8fceb03108a33960b4b6&sep=3'
     }
 
     def start_requests(self):
         section_group_ids= [9,2,5,8,40,3,60,12,64,57,18,98,6,58,11,10,4,73,71,56,55,7,66,63,65,76,70,394,68,79,]
         # section_group_ids = [9]
         for sg_id in section_group_ids:
-            for page_index in range(1, 18):
-                secton_param = {
-                    'rank_type': 0,
-                    'area_type': 0,
-                    'page_index': page_index,
-                    'items_per_page':20,
-                    'section_group_id': sg_id,
-                    'ad_status':1
-                }
-                url = 'https://ask.dxy.com/view/i/sectiongroup/member?' + urlencode(secton_param)
-                yield scrapy.Request(url, meta={'sg_id': sg_id, 'nitems': 20}, callback=self.parse)
+            section_param = {
+                'rank_type': 0,
+                'area_type': 0,
+                'page_index': 1,
+                'items_per_page':20,
+                'section_group_id': sg_id,
+                'ad_status':1
+            }
+            url = 'https://ask.dxy.com/view/i/sectiongroup/member?' + urlencode(section_param)
+            yield scrapy.Request(url, meta={'query_param': section_param}, callback=self.parse_first)
+    def parse_first(self, response):
+        jsonresponse = json.loads(response.body)
+        total_pages = jsonresponse['data']['total_pages']
+        for i in range(2, total_pages+1):
+            query_param = response.meta['query_param']
+            query_param['page_index'] = i
+            url = 'https://ask.dxy.com/view/i/sectiongroup/member?' + urlencode(query_param)
+            yield scrapy.Request(url, meta={'query_param': query_param}, callback=self.parse)
     def parse(self, response):
         jsonresponse = json.loads(response.body)
-        sg_id = response.meta['sg_id']
-        for i in range(response.meta['nitems']):
+        sg_id = response.meta['query_param']['section_group_id']
+        for i in range(response.meta['query_param']['items_per_page']):
             # il = scrapy.loader.ItemLoader(item=DoctorItem(), response=response)
             it = DoctorItem()
             doctor_json = jsonresponse['data']['items'][i]

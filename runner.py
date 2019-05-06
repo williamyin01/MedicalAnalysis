@@ -5,7 +5,9 @@ try:
         [
             'scrapy',
             'crawl',
-            'q_id_spider',
+            # 'q_id_spider',
+            # 'doctorSpider',
+            'dxspider',
             # '-o',
             # 'out.json',
         ]

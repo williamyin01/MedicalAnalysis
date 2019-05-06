@@ -8,21 +8,6 @@
 import scrapy
 
 
-class MedicItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    date= scrapy.Field()
-    doctor_id = scrapy.Field()
-    question = scrapy.Field()
-    answer = scrapy.Field()
-    q1 = scrapy.Field()
-    a1 = scrapy.Field()
-    q2 = scrapy.Field()
-    a2 = scrapy.Field()
-    q3 = scrapy.Field()
-    a3 = scrapy.Field()
-    q_id = scrapy.Field()
-
 # advaced q&a item
 class QAItem(scrapy.Item):
     id = scrapy.Field()

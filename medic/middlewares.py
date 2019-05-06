@@ -97,35 +97,3 @@ class MedicDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
-
-class CheckURLMiddleware(object):
-    def __init__(self):
-        self.usedurlsA = None
-        self.logger = logging.getLogger('CheckURLMiddleware')
-    def process_request(self, request, spider):
-        self.logger.debug(len(self.usedurlsR.readlines()))
-        if request.url in self.usedurlsR.readlines():
-            self.logger.debug('Ignore url in process_request: {}'.format(request.url))
-            raise IgnoreRequest
-        else:
-            return None
-    def process_response(self, request, response, spider):
-        self.usedurlsA.write(request.url + '\n')
-        self.usedurlsA.flush()
-        return response
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        # This method is used by Scrapy to create your spiders.
-        s = cls()
-        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
-        crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
-        return s
-    def spider_opened(self, spider):
-        spider.logger.info('Spider opened: %s' % spider.name)
-        self.usedurlsA = open('usedURL.log', 'a+')
-        self.usedurlsR = open('usedURL.log', 'r+')
-    def spider_closed(self, spider):
-        spider.logger.info('Spider closed: %s' % spider.name)
-        self.usedurlsA.close()
-        self.usedurlsR.close()

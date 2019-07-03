@@ -11,7 +11,6 @@ log = logging.getLogger('scrapy.proxies')
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 class ProxyMiddleware(object):
-    # proxy middlewares developed by me
     # choose a proxy from api, and check if it's available for extracting json
     # if not available, delete it from proxy pool and find a new one
     def __init__(self, settings):

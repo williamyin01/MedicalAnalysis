@@ -7,7 +7,8 @@ try:
             'crawl',
             # 'q_id_spider',
             # 'doctorSpider',
-            'dxspider',
+            # 'dxspider',
+            'askspider',
             # '-o',
             # 'out.json',
         ]
